@@ -6,6 +6,13 @@ if (typeof window.$$ === 'undefined') {
   window.$$ = (sel, p = document) => Array.from(p.querySelectorAll(sel));
 }
 
+// prevent duplicate binds if this script is loaded twice
+if (window.__dashboardUploadBound) {
+  console.warn('[dashboard] duplicate script/binds prevented');
+} else {
+  window.__dashboardUploadBound = true;
+}
+
 function getCSRF() {
   const meta = document.querySelector('meta[name="csrf"]');
   return meta ? meta.content : '';
@@ -17,6 +24,9 @@ function toastStatus(msg, isError = false) {
   el.textContent = msg || '';
   el.className = isError ? 'text-sm text-red-600' : 'text-sm text-gray-600';
 }
+
+// single-flight flag for upload to avoid double requests
+let _uploading = false;
 
 // 승인된 매체 목록 로드 & 렌더
 async function loadMediaList() {
@@ -171,20 +181,30 @@ async function onGenerate() {
 
 // PDF 업로드 핸들러
 async function onUpload() {
+  if (_uploading) {
+    console.warn('[upload] already in-flight');
+    toastStatus('업로드 중입니다… 잠시만요.');
+    return;
+  }
+  _uploading = true;
+
   const input = document.getElementById('pdf');
   const statusEl = document.getElementById('upload-status');
   if (!input || !input.files || input.files.length === 0) {
     toastStatus('업로드할 PDF를 선택하세요.', true);
+    _uploading = false;
     return;
   }
   const file = input.files[0];
   const MAX = 20 * 1024 * 1024; // 20MB (config와 맞춤)
   if (file.type !== 'application/pdf') {
     toastStatus('PDF 파일만 업로드할 수 있습니다.', true);
+    _uploading = false;
     return;
   }
   if (file.size > MAX) {
     toastStatus('파일 크기가 20MB를 초과했습니다.', true);
+    _uploading = false;
     return;
   }
 
@@ -219,6 +239,8 @@ async function onUpload() {
     }
   } catch (err) {
     toastStatus(err?.message || '업로드 실패', true);
+  } finally {
+    _uploading = false;
   }
 }
 
@@ -288,12 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 업로드 버튼/폼 바인딩
   $('#btn-upload')?.addEventListener('click', (e) => { e.preventDefault(); onUpload(); });
   $('#upload-form')?.addEventListener('submit', (e) => { e.preventDefault(); onUpload(); });
-
-  // 백업: 이벤트 위임 (혹시 초기 바인딩이 누락되었을 때 대비)
-  document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('#btn-upload');
-    if (btn) { e.preventDefault(); onUpload(); }
-  });
 });
 
 // 간단한 디바운스

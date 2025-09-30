@@ -78,7 +78,7 @@ $csrf = $_SESSION['csrf'] ?? '';
       </div>
     </div>
 
-    <div id="media-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="media-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-1">
       <!-- AJAX로 렌더링 -->
     </div>
 
