@@ -2,39 +2,35 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-$userName = $_SESSION['user_name'] ?? null;
-$userCompany = $_SESSION['user_company'] ?? null;
 ?>
-<!doctype html>
-<html lang="ko" class="h-full bg-gray-950">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= $pageTitle ?? 'AI 옥외광고 블로그 생성기' ?></title>
-  <!-- Tailwind CSS CDN -->
+  <meta charset="UTF-8">
+  <title>AI 광고 블로그 생성기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="h-full text-gray-100 flex flex-col min-h-screen">
-
-<!-- 헤더 -->
-<header class="bg-gray-900 border-b border-gray-800">
-  <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-    <a href="index.php" class="text-xl font-bold text-indigo-400">
-      OffAd 블로그 생성기
-    </a>
-    <nav class="flex items-center space-x-6 text-sm">
-      <?php if ($userName): ?>
-        <span class="text-gray-300">
-          <?= htmlspecialchars($userName) ?> (<?= htmlspecialchars($userCompany) ?>)
-        </span>
-        <a href="posts.php" class="hover:text-indigo-400">내 글목록</a>
-        <a href="logout.php" class="hover:text-red-400">로그아웃</a>
-      <?php else: ?>
-        <a href="login.php" class="hover:text-indigo-400">로그인</a>
-        <a href="register.php" class="hover:text-indigo-400">회원가입</a>
-      <?php endif; ?>
-    </nav>
-  </div>
-</header>
-
-<main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <!-- 헤더 -->
+  <header class="bg-white shadow">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-indigo-600">
+        <a href="/">AI 광고 블로그 생성기</a>
+      </h1>
+      <nav>
+        <?php if (!empty($_SESSION['user'])): ?>
+          <a href="/dashboard.php" class="text-gray-700 hover:text-indigo-600 mr-4">대시보드</a>
+          <?php if ($_SESSION['user']['role'] === 'admin'): ?>
+            <a href="/admin/index.php" class="text-gray-700 hover:text-indigo-600 mr-4">관리자</a>
+          <?php endif; ?>
+          <a href="/auth/logout.php" class="text-gray-700 hover:text-red-600">로그아웃</a>
+        <?php else: ?>
+          <a href="/auth/login.php" class="text-gray-700 hover:text-indigo-600 mr-4">로그인</a>
+          <a href="/auth/signup.php" class="text-gray-700 hover:text-indigo-600">회원가입</a>
+        <?php endif; ?>
+      </nav>
+    </div>
+  </header>
+  <main class="flex-1 flex items-center justify-center">
